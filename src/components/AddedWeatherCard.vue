@@ -32,16 +32,15 @@
 </template>
 
 <script>
-import axios from 'axios'
 import countries from 'alpha2-countries'
 import moment from 'moment'
+import { callWeather } from './helpers/weather'
 
 export default {
   props: ['cityName', 'geoLocation'],
   data () {
     return {
       weather: {},
-      weatherUrl: 'https://api.openweathermap.org/data/2.5/',
       country: null,
       weather_forecast: null,
       temperature: null,
@@ -76,31 +75,19 @@ export default {
       clearInterval(this.counter)
     }
   },
-  computed: {
-    endPoint () {
-      let query = 'q=' + this.cityName
-      if (this.geoLocation) {
-        query = `lat=${this.geoLocation.coords.latitude}&lon=${this.geoLocation.coords.longitude}`
-      }
-
-      return `${this.weatherUrl}weather?${query}&units=metric&APPID=${process.env.VUE_APP_WEATHER_KEY}`
-    }
-  },
   methods: {
     fetchWeather () {
-      if (this.cityName || this.geoLocation) {
-        axios
-          .get(this.endPoint)
-          .then(response => {
-            this.weather = response.data
-            this.checkTime = moment()
-            this.checkTimeAgo = this.checkTime.fromNow()
-          })
-          .catch(error => {
-            console.log(error)
-            this.remove()
-          })
-      }
+      callWeather(this.cityName, this.geoLocation).then(
+        r => {
+          this.weather = r.data
+          this.checkTime = moment()
+          this.checkTimeAgo = this.checkTime.fromNow()
+        },
+        err => {
+          console.log(err)
+          this.remove()
+        }
+      )
     },
     remove () {
       this.$emit('remove', this.cityName)

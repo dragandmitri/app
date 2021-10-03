@@ -92,7 +92,6 @@ export default {
   position: relative;
   min-width: 360px;
 }
-
 .page-title {
   text-align: center;
   font-size: 70px;
@@ -160,13 +159,14 @@ export default {
 
   @media all and (max-width: 768px) {
     margin-top: 0;
+    padding:0;
   }
 }
 
 .add-card-button {
   position: fixed;
   right: 45px;
-  top: 92%;
+  top: 88vh;
   width: 56px;
   height: 56px;
   background: linear-gradient(#fff, #fff), linear-gradient(#fff, #fff), #9b51e0;

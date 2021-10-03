@@ -16,11 +16,11 @@
             />
             <hr :class="v$.search.$error ? 'hr-error' : ''" />
             <div
-              v-if="(cityFromResponse == true) & !v$.search.$error"
+              v-if="cityName && !v$.search.$error"
               class="city-from-response"
               @click="addCityFromResponse"
             >
-              {{ response }}
+              {{ cityName }}
             </div>
             <div class="error_message" v-if="v$.search.$error">
               <div v-for="(error, index) of v$.search.$errors" :key="index">
@@ -47,11 +47,9 @@
             <div
               @click="add"
               class="modal-window__action__rightside__add button"
-              :class="
-                v$.search.$error || search == '' || response === ''
-                  ? 'disabled'
-                  : ''
-              "
+              :class="{
+                disabled: v$.search.$error || !successSearch
+              }"
             >
               add
             </div>
@@ -65,7 +63,7 @@
 <script>
 import useVuelidate from '@vuelidate/core'
 import { required, alpha, helpers } from '@vuelidate/validators'
-import axios from 'axios'
+import { callWeather } from './helpers/weather'
 
 export default {
   setup () {
@@ -74,8 +72,8 @@ export default {
   data () {
     return {
       search: '',
-      response: '',
-      cityFromresponse: false
+      cityName: null,
+      successSearch: false
     }
   },
   validations () {
@@ -88,22 +86,22 @@ export default {
   },
   methods: {
     fetchCity () {
-      axios
-        .get(
-          `https://api.openweathermap.org/data/2.5/weather?q=${this.search}&units=metric&APPID=${process.env.VUE_APP_WEATHER_KEY}`
-        )
-        .then(response => {
-          this.response = response.data.name
-          this.cityFromResponse = true
-        })
-        .catch(error => {
-          this.response = ''
-          console.log(error)
-        })
+      this.successSearch = false
+
+      callWeather(this.search).then(
+        r => {
+          this.cityName = r.data.name
+          this.successSearch = true
+        },
+        () => {
+          this.cityName = null
+          this.successSearch = false
+        }
+      )
     },
     addCityFromResponse () {
-      this.search = this.response
-      this.cityFromResponse = false
+      this.search = this.cityName
+      this.cityName = null
     },
     clear () {
       this.search = ''
@@ -127,9 +125,8 @@ export default {
   background: rgba(11, 11, 11, 0.5);
   z-index: 1;
 }
-
 .modal-window {
-  position: absolute;
+  position: fixed;
   height: 373px;
   width: 100%;
   max-width: 677px;
@@ -141,9 +138,8 @@ export default {
   padding: 24px;
 
   @media all and (max-width: 768px) {
-    max-width: 80%;
+    max-width: 80vw;
   }
-
   .modal-window__wrapper {
     position: relative;
     width: 100%;
