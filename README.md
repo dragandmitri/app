@@ -1,5 +1,6 @@
 # weather-app
-
+Create .env file in root directory and copy .env.dev to .env,
+ then in .env add your openweathermap API key to VUE_APP_WEATHER_KEY
 ## Project setup
 ```
 npm install
