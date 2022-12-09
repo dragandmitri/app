@@ -12,7 +12,7 @@
               class="modal-window__search__input"
               placeholder="Search city"
               v-model.trim="v$.search.$model"
-              @input="fetchCity"
+              v-debounce:300ms="fetchCity"
             />
             <hr :class="v$.search.$error ? 'hr-error' : ''" />
             <div
@@ -64,6 +64,7 @@
 import useVuelidate from '@vuelidate/core'
 import { required, alpha, helpers } from '@vuelidate/validators'
 import { callWeather } from './helpers/weather'
+import { vue3Debounce } from 'vue-debounce'
 
 export default {
   setup () {
@@ -83,6 +84,9 @@ export default {
         alpha
       }
     }
+  },
+  directives: {
+    debounce: vue3Debounce({ lock: true })
   },
   methods: {
     fetchCity () {
